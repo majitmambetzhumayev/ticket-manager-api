@@ -1,0 +1,6 @@
+using MediatR;
+using TicketManager.Application.DTOs;
+
+namespace TicketManager.Application.Commands.ResolveTicket;
+
+public record ResolveTicketCommand(Guid Id) : IRequest<TicketDto>;
