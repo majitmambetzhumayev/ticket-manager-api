@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TicketManager.API/TicketManager.API.csproj" />
+  <Project Path="TicketManager.Application/TicketManager.Application.csproj" />
+  <Project Path="TicketManager.Domain/TicketManager.Domain.csproj" />
+  <Project Path="TicketManager.Infrastructure/TicketManager.Infrastructure.csproj" />
+  <Project Path="TicketManager.Tests/TicketManager.Tests.csproj" />
+</Solution>

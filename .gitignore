@@ -1,0 +1,9 @@
+bin/
+obj/
+.vs/
+*.user
+
+# Notes de travail avec l'assistant IA, pas du livrable
+CLAUDE.md
+LEARNING_PROFILE.md
+NOTES.md
