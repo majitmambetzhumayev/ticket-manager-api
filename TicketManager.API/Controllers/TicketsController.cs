@@ -9,6 +9,7 @@ using TicketManager.Application.Commands.StartTicketProgress;
 using TicketManager.Application.Commands.UpdateTicket;
 using TicketManager.Application.Queries.GetAllTickets;
 using TicketManager.Application.Queries.GetTicketById;
+using TicketManager.Domain.Enums;
 
 namespace TicketManager.API.Controllers;
 
@@ -27,7 +28,7 @@ public class TicketsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetTicketByIdQuery(id), ct);
@@ -35,41 +36,41 @@ public class TicketsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<IActionResult> GetAll([FromQuery] TicketStatus? status, CancellationToken ct)
     {
-        var result = await _mediator.Send(new GetAllTicketsQuery(), ct);
+        var result = await _mediator.Send(new GetAllTicketsQuery(status), ct);
         return Ok(result);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, UpdateTicketRequest request, CancellationToken ct)
     {
         var result = await _mediator.Send(new UpdateTicketCommand(id, request.Title, request.Description), ct);
         return Ok(result);
     }
 
-    [HttpPost("{id}/start-progress")]
+    [HttpPost("{id:guid}/start-progress")]
     public async Task<IActionResult> StartProgress(Guid id, CancellationToken ct)
     {
         var result = await _mediator.Send(new StartTicketProgressCommand(id), ct);
         return Ok(result);
     }
 
-    [HttpPost("{id}/resolve")]
+    [HttpPost("{id:guid}/resolve")]
     public async Task<IActionResult> Resolve(Guid id, CancellationToken ct)
     {
         var result = await _mediator.Send(new ResolveTicketCommand(id), ct);
         return Ok(result);
     }
 
-    [HttpPost("{id}/close")]
+    [HttpPost("{id:guid}/close")]
     public async Task<IActionResult> Close(Guid id, CancellationToken ct)
     {
         var result = await _mediator.Send(new CloseTicketCommand(id), ct);
         return Ok(result);
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         await _mediator.Send(new DeleteTicketCommand(id), ct);

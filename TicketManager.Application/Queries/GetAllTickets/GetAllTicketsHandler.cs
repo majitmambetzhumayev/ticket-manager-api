@@ -12,7 +12,7 @@ public class GetAllTicketsHandler : IRequestHandler<GetAllTicketsQuery, IEnumera
 
     public async Task<IEnumerable<TicketDto>> Handle(GetAllTicketsQuery query, CancellationToken ct)
     {
-        var tickets = await _repo.GetAllAsync(ct);
+        var tickets = await _repo.GetAllAsync(query.Status, ct);
         return tickets.Select(TicketDto.FromDomain);
     }
 }

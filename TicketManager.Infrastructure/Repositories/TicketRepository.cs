@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TicketManager.Domain.Entities;
+using TicketManager.Domain.Enums;
 using TicketManager.Domain.Interfaces;
 using TicketManager.Infrastructure.Persistence;
 
@@ -14,8 +15,12 @@ public class TicketRepository : ITicketRepository
     public async Task<Ticket?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id, ct);
 
-    public async Task<IEnumerable<Ticket>> GetAllAsync(CancellationToken ct = default) =>
-        await _context.Tickets.ToListAsync(ct);
+    public async Task<IEnumerable<Ticket>> GetAllAsync(TicketStatus? status = null, CancellationToken ct = default)
+    {
+        var query = _context.Tickets.AsQueryable();
+        if (status.HasValue) query = query.Where(t => t.Status == status.Value);
+        return await query.ToListAsync(ct);
+    }
 
     public async Task AddAsync(Ticket ticket, CancellationToken ct = default)
     {
