@@ -25,7 +25,6 @@ public class TicketRepository : ITicketRepository
 
     public async Task UpdateAsync(Ticket ticket, CancellationToken ct = default)
     {
-        _context.Tickets.Update(ticket);
         await _context.SaveChangesAsync(ct);
     }
 

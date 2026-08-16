@@ -9,6 +9,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
     public void Configure(EntityTypeBuilder<Ticket> builder)
     {
         builder.HasKey(t => t.Id);
+        builder.Property(t => t.Id).ValueGeneratedNever();
 
         builder.Property(t => t.Title).IsRequired().HasMaxLength(200);
         builder.Property(t => t.Description).IsRequired().HasMaxLength(2000);
@@ -18,6 +19,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.OwnsMany(t => t.History, history =>
         {
             history.HasKey(h => h.Id);
+            history.Property(h => h.Id).ValueGeneratedNever();
             history.WithOwner().HasForeignKey("TicketId");
             history.Property<Guid>("TicketId");
         });
