@@ -3,6 +3,15 @@ obj/
 .vs/
 *.user
 
+# Python (ai-service)
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Secrets
+.env
+
 # Notes de travail avec l'assistant IA, pas du livrable
 CLAUDE.md
 LEARNING_PROFILE.md

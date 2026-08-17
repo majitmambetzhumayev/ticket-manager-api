@@ -9,6 +9,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TICKET_API_BASE_URL=http://api:8080
+    depends_on:
+      - api
   db:
     image: postgres:16
     environment:
