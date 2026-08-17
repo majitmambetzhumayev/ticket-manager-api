@@ -11,6 +11,7 @@ public record TicketDto(
     TicketPriority Priority,
     Guid UserId,
     DateTime CreatedAt,
+    string? ResolutionNotes,
     IReadOnlyCollection<TicketHistoryEntryDto> History)
 {
     public static TicketDto FromDomain(Ticket ticket) => new(
@@ -21,5 +22,6 @@ public record TicketDto(
         ticket.Priority,
         ticket.UserId,
         ticket.CreatedAt,
+        ticket.ResolutionNotes,
         ticket.History.Select(h => new TicketHistoryEntryDto(h.Id, h.Field, h.OldValue, h.NewValue, h.ChangedAt)).ToList());
 }

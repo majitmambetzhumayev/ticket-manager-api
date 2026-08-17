@@ -14,6 +14,7 @@ public class Ticket
     public TicketPriority Priority { get; private set; }
     public Guid UserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public string? ResolutionNotes { get; private set; }
     public IReadOnlyCollection<TicketHistoryEntry> History => _history.AsReadOnly();
 
     private Ticket() { } // EF Core
@@ -51,7 +52,13 @@ public class Ticket
 
     public void StartProgress() => TransitionTo(TicketStatus.InProgress, TicketStatus.Open);
 
-    public void Resolve() => TransitionTo(TicketStatus.Resolved, TicketStatus.InProgress);
+    public void Resolve(string resolutionNotes)
+    {
+        if (string.IsNullOrWhiteSpace(resolutionNotes)) throw new DomainException("Resolution notes are required.");
+
+        TransitionTo(TicketStatus.Resolved, TicketStatus.InProgress);
+        ResolutionNotes = resolutionNotes;
+    }
 
     public void Close() => TransitionTo(TicketStatus.Closed, TicketStatus.Resolved);
 

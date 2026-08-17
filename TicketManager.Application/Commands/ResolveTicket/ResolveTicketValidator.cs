@@ -4,5 +4,9 @@ namespace TicketManager.Application.Commands.ResolveTicket;
 
 public class ResolveTicketValidator : AbstractValidator<ResolveTicketCommand>
 {
-    public ResolveTicketValidator() => RuleFor(x => x.Id).NotEmpty();
+    public ResolveTicketValidator()
+    {
+        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.ResolutionNotes).NotEmpty().MaximumLength(2000);
+    }
 }

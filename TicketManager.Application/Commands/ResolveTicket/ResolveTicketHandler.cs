@@ -16,7 +16,7 @@ public class ResolveTicketHandler : IRequestHandler<ResolveTicketCommand, Ticket
         var ticket = await _repo.GetByIdAsync(cmd.Id, ct)
             ?? throw new NotFoundException($"Ticket {cmd.Id} not found.");
 
-        ticket.Resolve();
+        ticket.Resolve(cmd.ResolutionNotes);
         await _repo.UpdateAsync(ticket, ct);
 
         return TicketDto.FromDomain(ticket);

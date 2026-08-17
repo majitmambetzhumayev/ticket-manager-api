@@ -57,9 +57,9 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPost("{id:guid}/resolve")]
-    public async Task<IActionResult> Resolve(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Resolve(Guid id, ResolveTicketRequest request, CancellationToken ct)
     {
-        var result = await _mediator.Send(new ResolveTicketCommand(id), ct);
+        var result = await _mediator.Send(new ResolveTicketCommand(id, request.ResolutionNotes), ct);
         return Ok(result);
     }
 

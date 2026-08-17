@@ -52,7 +52,7 @@ public class TicketTests
     {
         var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
         ticket.StartProgress();
-        ticket.Resolve();
+        ticket.Resolve("Redémarrage de l'appareil.");
 
         var act = () => ticket.UpdateDetails("Nouveau titre", "Nouvelle description");
 
@@ -65,7 +65,7 @@ public class TicketTests
         var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
 
         ticket.StartProgress();
-        ticket.Resolve();
+        ticket.Resolve("Redémarrage de l'appareil.");
         ticket.Close();
 
         ticket.Status.Should().Be(TicketStatus.Closed);
@@ -79,6 +79,28 @@ public class TicketTests
         ticket.StartProgress();
 
         var act = () => ticket.EnsureDeletable();
+
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void Resolve_ValidNotes_StoresResolutionNotes()
+    {
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        ticket.StartProgress();
+
+        ticket.Resolve("Câble remplacé.");
+
+        ticket.ResolutionNotes.Should().Be("Câble remplacé.");
+    }
+
+    [Fact]
+    public void Resolve_EmptyNotes_ThrowsDomainException()
+    {
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        ticket.StartProgress();
+
+        var act = () => ticket.Resolve("");
 
         act.Should().Throw<DomainException>();
     }
