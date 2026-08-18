@@ -6,6 +6,7 @@ services:
     environment:
       - ConnectionStrings__Default=Host=db;Database=ticketmanager;Username=postgres;Password=postgres
       - ASPNETCORE_ENVIRONMENT=Development
+      - AiService__BaseUrl=http://ai-service:8000
     depends_on:
       db:
         condition: service_healthy

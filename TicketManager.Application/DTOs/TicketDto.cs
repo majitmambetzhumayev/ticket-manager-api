@@ -12,6 +12,9 @@ public record TicketDto(
     Guid UserId,
     DateTime CreatedAt,
     string? ResolutionNotes,
+    string Category,
+    string? SuggestedResponse,
+    bool GroundedInHistory,
     IReadOnlyCollection<TicketHistoryEntryDto> History)
 {
     public static TicketDto FromDomain(Ticket ticket) => new(
@@ -23,5 +26,8 @@ public record TicketDto(
         ticket.UserId,
         ticket.CreatedAt,
         ticket.ResolutionNotes,
+        ticket.Category,
+        ticket.SuggestedResponse,
+        ticket.GroundedInHistory,
         ticket.History.Select(h => new TicketHistoryEntryDto(h.Id, h.Field, h.OldValue, h.NewValue, h.ChangedAt)).ToList());
 }

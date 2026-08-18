@@ -17,7 +17,12 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         services.AddScoped<ITicketRepository, TicketRepository>();
-        services.AddScoped<ITicketAIClassifier, StubTicketAIClassifier>();
+
+        services.AddHttpClient<ITicketAIClassifier, HttpTicketAIClassifier>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["AiService:BaseUrl"]!);
+            client.Timeout = TimeSpan.FromSeconds(15);
+        });
 
         return services;
     }

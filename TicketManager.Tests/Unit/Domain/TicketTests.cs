@@ -10,17 +10,39 @@ public class TicketTests
     [Fact]
     public void Create_ValidInput_ReturnsOpenTicket()
     {
-        var ticket = Ticket.Create("Écran cassé", "L'écran ne s'allume plus", Guid.NewGuid(), TicketPriority.High);
+        var ticket = Ticket.Create("Écran cassé", "L'écran ne s'allume plus", Guid.NewGuid(), TicketPriority.High, "Technical");
 
         ticket.Status.Should().Be(TicketStatus.Open);
         ticket.Priority.Should().Be(TicketPriority.High);
+        ticket.Category.Should().Be("Technical");
+        ticket.SuggestedResponse.Should().BeNull();
+        ticket.GroundedInHistory.Should().BeFalse();
         ticket.History.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Create_WithSuggestedResponse_StoresItAndGroundingFlag()
+    {
+        var ticket = Ticket.Create(
+            "Panne serveur", "Erreur 502", Guid.NewGuid(), TicketPriority.Critical, "Technical",
+            suggestedResponse: "Redémarrer le load balancer.", groundedInHistory: true);
+
+        ticket.SuggestedResponse.Should().Be("Redémarrer le load balancer.");
+        ticket.GroundedInHistory.Should().BeTrue();
     }
 
     [Fact]
     public void Create_EmptyTitle_ThrowsDomainException()
     {
-        var act = () => Ticket.Create("", "description", Guid.NewGuid(), TicketPriority.Low);
+        var act = () => Ticket.Create("", "description", Guid.NewGuid(), TicketPriority.Low, "Technical");
+
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void Create_EmptyCategory_ThrowsDomainException()
+    {
+        var act = () => Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Low, "");
 
         act.Should().Throw<DomainException>();
     }
@@ -28,7 +50,7 @@ public class TicketTests
     [Fact]
     public void StartProgress_FromOpen_TransitionsAndLogsHistory()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
 
         ticket.StartProgress();
 
@@ -39,7 +61,7 @@ public class TicketTests
     [Fact]
     public void StartProgress_WhenAlreadyInProgress_ThrowsDomainException()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
         ticket.StartProgress();
 
         var act = () => ticket.StartProgress();
@@ -50,7 +72,7 @@ public class TicketTests
     [Fact]
     public void UpdateDetails_WhenResolved_ThrowsDomainException()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
         ticket.StartProgress();
         ticket.Resolve("Redémarrage de l'appareil.");
 
@@ -62,7 +84,7 @@ public class TicketTests
     [Fact]
     public void FullLifecycle_OpenToClosed_Succeeds()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
 
         ticket.StartProgress();
         ticket.Resolve("Redémarrage de l'appareil.");
@@ -75,7 +97,7 @@ public class TicketTests
     [Fact]
     public void EnsureDeletable_WhenNotOpen_ThrowsDomainException()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
         ticket.StartProgress();
 
         var act = () => ticket.EnsureDeletable();
@@ -86,7 +108,7 @@ public class TicketTests
     [Fact]
     public void Resolve_ValidNotes_StoresResolutionNotes()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
         ticket.StartProgress();
 
         ticket.Resolve("Câble remplacé.");
@@ -97,7 +119,7 @@ public class TicketTests
     [Fact]
     public void Resolve_EmptyNotes_ThrowsDomainException()
     {
-        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium);
+        var ticket = Ticket.Create("Titre", "Description", Guid.NewGuid(), TicketPriority.Medium, "Technical");
         ticket.StartProgress();
 
         var act = () => ticket.Resolve("");

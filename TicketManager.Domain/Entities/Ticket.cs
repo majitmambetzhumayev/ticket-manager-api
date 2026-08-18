@@ -15,14 +15,25 @@ public class Ticket
     public Guid UserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public string? ResolutionNotes { get; private set; }
+    public string Category { get; private set; } = null!;
+    public string? SuggestedResponse { get; private set; }
+    public bool GroundedInHistory { get; private set; }
     public IReadOnlyCollection<TicketHistoryEntry> History => _history.AsReadOnly();
 
     private Ticket() { } // EF Core
 
-    public static Ticket Create(string title, string description, Guid userId, TicketPriority priority)
+    public static Ticket Create(
+        string title,
+        string description,
+        Guid userId,
+        TicketPriority priority,
+        string category,
+        string? suggestedResponse = null,
+        bool groundedInHistory = false)
     {
         if (string.IsNullOrWhiteSpace(title)) throw new DomainException("Title is required.");
         if (string.IsNullOrWhiteSpace(description)) throw new DomainException("Description is required.");
+        if (string.IsNullOrWhiteSpace(category)) throw new DomainException("Category is required.");
 
         return new Ticket
         {
@@ -31,6 +42,9 @@ public class Ticket
             Description = description,
             Status = TicketStatus.Open,
             Priority = priority,
+            Category = category,
+            SuggestedResponse = suggestedResponse,
+            GroundedInHistory = groundedInHistory,
             UserId = userId,
             CreatedAt = DateTime.UtcNow
         };

@@ -19,8 +19,11 @@ public class CreateTicketHandler : IRequestHandler<CreateTicketCommand, TicketDt
 
     public async Task<TicketDto> Handle(CreateTicketCommand cmd, CancellationToken ct)
     {
-        var priority = await _classifier.ClassifyAsync(cmd.Title, cmd.Description, ct);
-        var ticket = Ticket.Create(cmd.Title, cmd.Description, cmd.UserId, priority);
+        var classification = await _classifier.ClassifyAsync(cmd.Title, cmd.Description, ct);
+        var ticket = Ticket.Create(
+            cmd.Title, cmd.Description, cmd.UserId,
+            classification.Priority, classification.Category,
+            classification.SuggestedResponse, classification.GroundedInHistory);
         await _repo.AddAsync(ticket, ct);
         return TicketDto.FromDomain(ticket);
     }
