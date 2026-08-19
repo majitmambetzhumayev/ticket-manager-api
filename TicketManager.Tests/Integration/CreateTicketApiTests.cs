@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentAssertions;
 using TicketManager.Application.Commands.CreateTicket;
 using TicketManager.Application.DTOs;
@@ -9,6 +11,12 @@ namespace TicketManager.Tests.Integration;
 
 public class CreateTicketApiTests : IClassFixture<IntegrationTestWebAppFactory>
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() },
+    };
+
     private readonly HttpClient _client;
 
     public CreateTicketApiTests(IntegrationTestWebAppFactory factory)
@@ -24,7 +32,7 @@ public class CreateTicketApiTests : IClassFixture<IntegrationTestWebAppFactory>
         var response = await _client.PostAsJsonAsync("/api/tickets", command);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var created = await response.Content.ReadFromJsonAsync<TicketDto>();
+        var created = await response.Content.ReadFromJsonAsync<TicketDto>(JsonOptions);
         created.Should().NotBeNull();
         created!.Title.Should().Be(command.Title);
         created.Status.Should().Be(TicketStatus.Open);
@@ -32,7 +40,7 @@ public class CreateTicketApiTests : IClassFixture<IntegrationTestWebAppFactory>
 
         var getResponse = await _client.GetAsync($"/api/tickets/{created.Id}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var fetched = await getResponse.Content.ReadFromJsonAsync<TicketDto>();
+        var fetched = await getResponse.Content.ReadFromJsonAsync<TicketDto>(JsonOptions);
         fetched!.Id.Should().Be(created.Id);
         fetched.Title.Should().Be(command.Title);
     }
