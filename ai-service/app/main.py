@@ -2,8 +2,10 @@ from fastapi import FastAPI
 
 from app.graph.graph import ticket_graph
 from app.schemas import ClassifyRequest, ClassifyResponse
+from app.telemetry import setup_telemetry
 
 app = FastAPI(title="Ticket AI Service")
+setup_telemetry(app)
 
 
 @app.post("/classify", response_model=ClassifyResponse)
