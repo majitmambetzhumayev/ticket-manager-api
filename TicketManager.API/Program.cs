@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using FluentValidation;
+using TicketManager.API;
 using TicketManager.API.Middleware;
 using TicketManager.Application.Behaviors;
 using TicketManager.Application.Commands.CreateTicket;
@@ -36,6 +37,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateTicketCommand>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.AddObservability();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -53,6 +56,7 @@ app.UseCors(FrontendCorsPolicy);
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapPrometheusScrapingEndpoint();
 
 app.Run();
 
