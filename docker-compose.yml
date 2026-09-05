@@ -7,6 +7,7 @@ services:
       - ConnectionStrings__Default=Host=db;Database=ticketmanager;Username=postgres;Password=postgres
       - ASPNETCORE_ENVIRONMENT=Development
       - AiService__BaseUrl=http://ai-service:8000
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
     depends_on:
       db:
         condition: service_healthy
@@ -17,6 +18,7 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - TICKET_API_BASE_URL=http://api:8080
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
     depends_on:
       - api
   db:
@@ -32,3 +34,27 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  tempo:
+    image: grafana/tempo:latest
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./observability/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./observability/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
