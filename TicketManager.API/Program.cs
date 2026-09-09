@@ -40,6 +40,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddObservability();
 builder.Services.AddApiRateLimiting();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -77,6 +78,7 @@ app.UseAuthorization();
 
 app.MapControllers().RequireRateLimiting(RateLimitingExtensions.PerIpPolicy);
 app.MapPrometheusScrapingEndpoint();
+app.MapHealthChecks("/health");
 
 app.Run();
 

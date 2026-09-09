@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-manager-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ticket-manager-api
+  template:
+    metadata:
+      labels:
+        app: ticket-manager-api
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      containers:
+        - name: api
+          image: ghcr.io/majitmambetzhumayev/ticket-manager-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: AiService__BaseUrl
+              value: "https://ai-service.invalid"
+            - name: ConnectionStrings__Default
+              valueFrom:
+                secretKeyRef:
+                  name: ticket-manager-db
+                  key: connectionstring
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          # Only a readinessProbe for now: /health has no dependency checks
+          # registered, so it can't yet tell "still starting" apart from
+          # "hung" any better than the readiness signal already does. A
+          # livenessProbe here would just restart pods on the same trivial
+          # condition, without catching anything readiness wouldn't.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
