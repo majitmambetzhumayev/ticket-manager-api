@@ -39,7 +39,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddObservability();
-builder.Services.AddApiRateLimiting();
+await builder.Services.AddApiRateLimitingAsync(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
@@ -72,13 +72,13 @@ app.UseHttpsRedirection();
 
 app.UseCors(FrontendCorsPolicy);
 
-app.UseRateLimiter();
+app.UseRedisRateLimiting();
 
 app.UseAuthorization();
 
-app.MapControllers().RequireRateLimiting(RateLimitingExtensions.PerIpPolicy);
-app.MapPrometheusScrapingEndpoint();
-app.MapHealthChecks("/health");
+app.MapControllers();
+app.MapPrometheusScrapingEndpoint(InfraEndpoints.Metrics);
+app.MapHealthChecks(InfraEndpoints.Health);
 
 app.Run();
 

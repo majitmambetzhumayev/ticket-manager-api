@@ -6,8 +6,6 @@ namespace TicketManager.API;
 
 public static class ObservabilityExtensions
 {
-    private static readonly string[] ExcludedFromTracing = ["/metrics", "/health"];
-
     public static IServiceCollection AddObservability(this IServiceCollection services)
     {
         services.AddOpenTelemetry()
@@ -15,7 +13,7 @@ public static class ObservabilityExtensions
             .WithTracing(tracing => tracing
                 .AddAspNetCoreInstrumentation(options =>
                     options.Filter = httpContext =>
-                        !ExcludedFromTracing.Any(path => httpContext.Request.Path.StartsWithSegments(path)))
+                        !InfraEndpoints.All.Any(path => httpContext.Request.Path.StartsWithSegments(path)))
                 .AddHttpClientInstrumentation()
                 .AddEntityFrameworkCoreInstrumentation()
                 .AddOtlpExporter())

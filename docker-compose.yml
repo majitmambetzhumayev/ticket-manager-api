@@ -8,6 +8,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - AiService__BaseUrl=http://ai-service:8000
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - Redis__ConnectionString=redis:6379
     depends_on:
       db:
         condition: service_healthy
@@ -34,6 +35,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "16379:6379"
   tempo:
     image: grafana/tempo:latest
     command: ["-config.file=/etc/tempo.yaml"]

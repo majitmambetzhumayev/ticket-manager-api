@@ -24,6 +24,8 @@ spec:
               value: "Production"
             - name: AiService__BaseUrl
               value: "https://ai-service.invalid"
+            - name: Redis__ConnectionString
+              value: "redis:6379"
             - name: ConnectionStrings__Default
               valueFrom:
                 secretKeyRef:
