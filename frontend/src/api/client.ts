@@ -1,8 +1,12 @@
 import type { CreateTicketRequest, Ticket } from './types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string
+// Empty in the Docker build (no VITE_API_BASE_URL set there): the built
+// frontend is served by the API itself, so relative URLs already resolve to
+// the right place. Local dev keeps pointing at the standalone dotnet run
+// instance via frontend/.env.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
-export const signInUrl = `${API_BASE_URL}/.auth/login/github`
+export const signInUrl = `${API_BASE_URL}/.auth/login/github?post_login_redirect_uri=/`
 export const signOutUrl = `${API_BASE_URL}/.auth/logout`
 
 export class ApiError extends Error {

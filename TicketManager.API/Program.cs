@@ -64,6 +64,15 @@ forwardedHeadersOptions.KnownIPNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedHeadersOptions);
 
+// Serves the built frontend (copied into wwwroot at image build time) so the
+// API and the UI share one origin in prod - sidesteps CORS entirely there,
+// and lets Easy Auth's post-login redirect land on a real page instead of a
+// bare API with no "/" route. Static files short-circuit the pipeline before
+// rate limiting/auth, which is fine: there's nothing costly or sensitive to
+// protect in a JS bundle.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
