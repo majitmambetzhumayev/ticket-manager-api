@@ -17,6 +17,11 @@ export async function getTickets(): Promise<Ticket[]> {
   return handleResponse<Ticket[]>(response)
 }
 
+export async function searchTickets(query: string): Promise<Ticket[]> {
+  const response = await fetch(`${API_BASE_URL}/api/tickets/search?q=${encodeURIComponent(query)}`)
+  return handleResponse<Ticket[]>(response)
+}
+
 export async function createTicket(request: CreateTicketRequest): Promise<Ticket> {
   const response = await fetch(`${API_BASE_URL}/api/tickets`, {
     method: 'POST',

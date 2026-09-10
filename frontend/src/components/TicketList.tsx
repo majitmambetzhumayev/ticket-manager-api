@@ -18,12 +18,13 @@ interface TicketListProps {
   tickets: Ticket[]
   loading: boolean
   error: string | null
+  emptyMessage?: string
 }
 
-export function TicketList({ tickets, loading, error }: TicketListProps) {
+export function TicketList({ tickets, loading, error, emptyMessage = 'No tickets yet.' }: TicketListProps) {
   if (loading) return <p className="text-slate-500">Loading tickets...</p>
   if (error) return <p className="text-red-600">{error}</p>
-  if (tickets.length === 0) return <p className="text-slate-500">No tickets yet.</p>
+  if (tickets.length === 0) return <p className="text-slate-500">{emptyMessage}</p>
 
   return (
     <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200">
