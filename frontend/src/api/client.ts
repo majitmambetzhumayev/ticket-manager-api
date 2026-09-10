@@ -24,12 +24,11 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 export async function isSignedIn(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/.auth/me`, { credentials: 'include' })
+    const response = await fetch(`${API_BASE_URL}/api/auth/status`, { credentials: 'include' })
     if (!response.ok) return false
-    const principals = (await response.json()) as unknown[]
-    return principals.length > 0
+    const { isSignedIn } = (await response.json()) as { isSignedIn: boolean }
+    return isSignedIn
   } catch {
-    // No Easy Auth locally (it's an Azure platform feature) - not logged in.
     return false
   }
 }

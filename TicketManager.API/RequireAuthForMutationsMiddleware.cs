@@ -12,6 +12,8 @@ namespace TicketManager.API;
 /// </summary>
 public class RequireAuthForMutationsMiddleware
 {
+    public const string ClientPrincipalIdHeader = "X-MS-CLIENT-PRINCIPAL-ID";
+
     private static bool IsProtectedMethod(string method) =>
         HttpMethods.IsPost(method) || HttpMethods.IsPut(method) || HttpMethods.IsDelete(method);
 
@@ -34,7 +36,7 @@ public class RequireAuthForMutationsMiddleware
             return;
         }
 
-        if (!context.Request.Headers.ContainsKey("X-MS-CLIENT-PRINCIPAL-ID"))
+        if (!context.Request.Headers.ContainsKey(ClientPrincipalIdHeader))
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
