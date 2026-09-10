@@ -18,7 +18,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(FrontendCorsPolicy, policy =>
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              // Needed so the browser sends the Easy Auth session cookie on
+              // cross-origin requests from the frontend to the API.
+              .AllowCredentials());
 });
 
 builder.Services.AddControllers()
@@ -53,9 +56,9 @@ var app = builder.Build();
 // Container Apps' ingress is the only path in. That assumption isn't
 // enforced by this code: if it ever stops holding (a VNet, a second proxy),
 // a caller could forge the header and dodge the rate limit. Accepted here
-// because this is a demo project with no auth and no sensitive data, not a
-// production trust boundary. Azure Container Apps doesn't publish a small,
-// stable IP range for its ingress that could be pinned instead.
+// because this is a demo project, not a production trust boundary. Azure
+// Container Apps doesn't publish a small, stable IP range for its ingress
+// that could be pinned instead.
 var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor };
 forwardedHeadersOptions.KnownIPNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
@@ -73,6 +76,10 @@ app.UseHttpsRedirection();
 app.UseCors(FrontendCorsPolicy);
 
 app.UseRedisRateLimiting();
+
+// See RequireAuthForMutationsMiddleware's doc comment for the trust model
+// (same reasoning as the X-Forwarded-For reliance above).
+app.UseAuthForMutations();
 
 app.UseAuthorization();
 

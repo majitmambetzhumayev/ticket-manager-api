@@ -24,7 +24,10 @@ export function CreateTicketForm({ onCreated }: CreateTicketFormProps) {
       formRef.current?.reset()
       return { error: null }
     } catch (err) {
-      return { error: err instanceof ApiError ? err.message : 'Failed to create ticket.' }
+      if (err instanceof ApiError) {
+        return { error: err.status === 401 ? 'Sign in with GitHub to create a ticket.' : err.message }
+      }
+      return { error: 'Failed to create ticket.' }
     }
   }, { error: null })
 
