@@ -9,6 +9,7 @@ using TicketManager.Application.Commands.StartTicketProgress;
 using TicketManager.Application.Commands.UpdateTicket;
 using TicketManager.Application.Queries.GetAllTickets;
 using TicketManager.Application.Queries.GetTicketById;
+using TicketManager.Application.Queries.SearchTickets;
 using TicketManager.Domain.Enums;
 
 namespace TicketManager.API.Controllers;
@@ -39,6 +40,13 @@ public class TicketsController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] TicketStatus? status, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetAllTicketsQuery(status), ct);
+        return Ok(result);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new SearchTicketsQuery(q), ct);
         return Ok(result);
     }
 

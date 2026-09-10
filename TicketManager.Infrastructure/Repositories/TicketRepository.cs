@@ -15,6 +15,9 @@ public class TicketRepository : ITicketRepository
     public async Task<Ticket?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id, ct);
 
+    public async Task<IEnumerable<Ticket>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default) =>
+        await _context.Tickets.Where(t => ids.Contains(t.Id)).ToListAsync(ct);
+
     public async Task<IEnumerable<Ticket>> GetAllAsync(TicketStatus? status = null, CancellationToken ct = default)
     {
         var query = _context.Tickets.AsQueryable();

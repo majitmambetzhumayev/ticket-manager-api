@@ -9,6 +9,7 @@ services:
       - AiService__BaseUrl=http://ai-service:8000
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
       - Redis__ConnectionString=redis:6379
+      - Elasticsearch__Uri=http://elasticsearch:9200
     depends_on:
       db:
         condition: service_healthy
@@ -39,6 +40,14 @@ services:
     image: redis:7-alpine
     ports:
       - "16379:6379"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.3
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
   tempo:
     image: grafana/tempo:latest
     command: ["-config.file=/etc/tempo.yaml"]
