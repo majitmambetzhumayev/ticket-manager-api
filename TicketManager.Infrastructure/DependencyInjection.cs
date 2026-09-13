@@ -23,7 +23,11 @@ public static class DependencyInjection
         services.AddHttpClient<ITicketAIClassifier, HttpTicketAIClassifier>(client =>
         {
             client.BaseAddress = new Uri(configuration["AiService:BaseUrl"]!);
-            client.Timeout = TimeSpan.FromSeconds(15);
+            // ai-service scales to zero in Azure: a cold start (Python boot +
+            // the classify graph's OpenAI calls) can exceed the 15s this used
+            // to be, so ticket creation would silently fall back to the
+            // default classification on every first request after idle.
+            client.Timeout = TimeSpan.FromSeconds(45);
         });
 
         var elasticsearchUri = configuration["Elasticsearch:Uri"] ?? "http://localhost:9200";
