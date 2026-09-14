@@ -23,6 +23,13 @@ const priorityStyles: Record<Ticket['priority'], string> = {
   Critical: 'text-red-600',
 }
 
+const linkButtonClass =
+  'rounded text-slate-600 underline outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50'
+const dangerLinkButtonClass =
+  'rounded text-red-600 underline outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-50'
+const primaryButtonClass =
+  'rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50'
+
 interface TicketRowProps {
   ticket: Ticket
   onUpdated: (ticket: Ticket) => void
@@ -30,7 +37,7 @@ interface TicketRowProps {
 }
 
 export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
-  const [mode, setMode] = useState<'view' | 'edit' | 'resolve'>('view')
+  const [mode, setMode] = useState<'view' | 'edit' | 'resolve' | 'delete'>('view')
   const [title, setTitle] = useState(ticket.title)
   const [description, setDescription] = useState(ticket.description)
   const [resolutionNotes, setResolutionNotes] = useState('')
@@ -48,11 +55,6 @@ export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
     } finally {
       setBusy(false)
     }
-  }
-
-  function handleDelete() {
-    if (!confirm(`Delete "${ticket.title}"?`)) return
-    void run(() => deleteTicket(ticket.id), () => onDeleted(ticket.id))
   }
 
   function cancelEdit() {
@@ -89,17 +91,18 @@ export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
             rows={2}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             <button
               disabled={busy}
               onClick={() => run(() => updateTicket(ticket.id, { title, description }), onUpdated)}
-              className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              className={primaryButtonClass}
             >
               Save
             </button>
-            <button onClick={cancelEdit} className="text-sm text-slate-500 underline">
+            <button onClick={cancelEdit} className={linkButtonClass}>
               Cancel
             </button>
+            {busy && <span className="text-sm text-slate-500">Working...</span>}
           </div>
         </div>
       )}
@@ -113,11 +116,11 @@ export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
             rows={2}
             className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             <button
               disabled={busy || !resolutionNotes.trim()}
               onClick={() => run(() => resolveTicket(ticket.id, resolutionNotes), onUpdated)}
-              className="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              className={primaryButtonClass}
             >
               Confirm
             </button>
@@ -126,18 +129,36 @@ export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
                 setResolutionNotes('')
                 setMode('view')
               }}
-              className="text-sm text-slate-500 underline"
+              className={linkButtonClass}
             >
               Cancel
             </button>
+            {busy && <span className="text-sm text-slate-500">Working...</span>}
           </div>
         </div>
       )}
 
+      {mode === 'delete' && (
+        <div className="flex items-center gap-3 rounded-md border border-red-200 bg-red-50 p-3">
+          <span className="text-sm text-red-800">Delete "{ticket.title}"?</span>
+          <button
+            disabled={busy}
+            onClick={() => run(() => deleteTicket(ticket.id), () => onDeleted(ticket.id))}
+            className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-50"
+          >
+            Confirm delete
+          </button>
+          <button onClick={() => setMode('view')} className={linkButtonClass}>
+            Cancel
+          </button>
+          {busy && <span className="text-sm text-slate-500">Working...</span>}
+        </div>
+      )}
+
       {mode === 'view' && (
-        <div className="flex flex-wrap gap-3 text-sm">
+        <div className="flex flex-wrap items-center gap-3 text-sm">
           {(ticket.status === 'Open' || ticket.status === 'InProgress') && (
-            <button disabled={busy} onClick={() => setMode('edit')} className="text-slate-600 underline">
+            <button disabled={busy} onClick={() => setMode('edit')} className={linkButtonClass}>
               Edit
             </button>
           )}
@@ -146,17 +167,17 @@ export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
               <button
                 disabled={busy}
                 onClick={() => run(() => startTicketProgress(ticket.id), onUpdated)}
-                className="text-slate-600 underline"
+                className={linkButtonClass}
               >
                 Start progress
               </button>
-              <button disabled={busy} onClick={handleDelete} className="text-red-600 underline">
+              <button disabled={busy} onClick={() => setMode('delete')} className={dangerLinkButtonClass}>
                 Delete
               </button>
             </>
           )}
           {ticket.status === 'InProgress' && (
-            <button disabled={busy} onClick={() => setMode('resolve')} className="text-slate-600 underline">
+            <button disabled={busy} onClick={() => setMode('resolve')} className={linkButtonClass}>
               Resolve
             </button>
           )}
@@ -164,11 +185,12 @@ export function TicketRow({ ticket, onUpdated, onDeleted }: TicketRowProps) {
             <button
               disabled={busy}
               onClick={() => run(() => closeTicket(ticket.id), onUpdated)}
-              className="text-slate-600 underline"
+              className={linkButtonClass}
             >
               Close
             </button>
           )}
+          {busy && <span className="text-slate-500">Working...</span>}
         </div>
       )}
 
