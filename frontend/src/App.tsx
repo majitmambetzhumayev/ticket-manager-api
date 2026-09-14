@@ -59,6 +59,8 @@ function App() {
         loading={loading}
         error={error}
         emptyMessage={isSearching ? 'No tickets match your search.' : 'No tickets yet.'}
+        onTicketUpdated={(updated) => setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))}
+        onTicketDeleted={(id) => setTickets((prev) => prev.filter((t) => t.id !== id))}
       />
     </main>
   )

@@ -23,6 +23,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const body = (await response.json().catch(() => null)) as { title?: string } | null
     throw new ApiError(body?.title ?? `Request failed with status ${response.status}`, response.status)
   }
+  if (response.status === 204) return undefined as T
   return response.json() as Promise<T>
 }
 
@@ -47,12 +48,36 @@ export async function searchTickets(query: string): Promise<Ticket[]> {
   return handleResponse<Ticket[]>(response)
 }
 
-export async function createTicket(request: CreateTicketRequest): Promise<Ticket> {
-  const response = await fetch(`${API_BASE_URL}/api/tickets`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+async function sendJson<T>(path: string, method: string, body?: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
     credentials: 'include',
-    body: JSON.stringify(request),
+    body: JSON.stringify(body),
   })
-  return handleResponse<Ticket>(response)
+  return handleResponse<T>(response)
+}
+
+export async function createTicket(request: CreateTicketRequest): Promise<Ticket> {
+  return sendJson<Ticket>('/api/tickets', 'POST', request)
+}
+
+export async function updateTicket(id: string, request: { title: string; description: string }): Promise<Ticket> {
+  return sendJson<Ticket>(`/api/tickets/${id}`, 'PUT', request)
+}
+
+export async function startTicketProgress(id: string): Promise<Ticket> {
+  return sendJson<Ticket>(`/api/tickets/${id}/start-progress`, 'POST')
+}
+
+export async function resolveTicket(id: string, resolutionNotes: string): Promise<Ticket> {
+  return sendJson<Ticket>(`/api/tickets/${id}/resolve`, 'POST', { resolutionNotes })
+}
+
+export async function closeTicket(id: string): Promise<Ticket> {
+  return sendJson<Ticket>(`/api/tickets/${id}/close`, 'POST')
+}
+
+export async function deleteTicket(id: string): Promise<void> {
+  return sendJson<void>(`/api/tickets/${id}`, 'DELETE')
 }
